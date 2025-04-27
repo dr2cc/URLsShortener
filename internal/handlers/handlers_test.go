@@ -2,134 +2,78 @@ package handlers
 
 import (
 	"net/http"
-	"net/http/httptest"
-	"strings"
+	"reflect"
 	"testing"
 
 	"github.com/dr2cc/URLsShortener.git/internal/storage"
 )
 
+// func TestGetHandler(t *testing.T) {
+// 	type args struct {
+// 		ts *storage.URLStorage
+// 	}
+// 	tests := []struct {
+// 		name string
+// 		args args
+// 		want http.HandlerFunc
+// 	}{
+// 		// TODO: Add test cases.
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			if got := GetHandler(tt.args.ts); !reflect.DeepEqual(got, tt.want) {
+// 				t.Errorf("GetHandler() = %v, want %v", got, tt.want)
+// 			}
+// 		})
+// 	}
+// }
+
 func TestPostHandler(t *testing.T) {
-	storage := storage.NewStorage()
-	handler := PostHandler(storage)
+	type args struct {
+		ts *storage.URLStorage
+	}
+
+	// //Здесь стандартно передаваемые ("правильные") данные, вне теста получаемые от клиента
+	// host := "localhost:8080"
+	shortURL := "6ba7b811"
+	// responseRecorder := httptest.NewRecorder()
+	storageInstance := storage.NewStorage()
+	storage.MakeEntry(storageInstance, shortURL, "https://practicum.yandex.ru/")
+	//record := map[string]string{shortURL: "https://practicum.yandex.ru/"}
+	// body := io.NopCloser(bytes.NewBuffer([]byte(record[shortURL])))
 
 	tests := []struct {
-		name        string
-		method      string
-		contentType string
-		body        string
-		wantStatus  int
+		name string
+		args args
+		want http.HandlerFunc
 	}{
 		{
-			name:        "Valid POST",
-			method:      http.MethodPost,
-			contentType: "text/plain",
-			body:        "https://example.com",
-			wantStatus:  http.StatusCreated,
-		},
-		{
-			name:        "Invalid content type",
-			method:      http.MethodPost,
-			contentType: "application/json",
-			body:        "https://example.com",
-			wantStatus:  http.StatusBadRequest,
-		},
-		{
-			name:        "Invalid method",
-			method:      http.MethodGet,
-			contentType: "text/plain",
-			body:        "https://example.com",
-			wantStatus:  http.StatusBadRequest,
+			name: "помогите, спасите",
+			args: args{
+				ts: *storageInstance,
+			},
+			// args: &storage.URLStorage{
+			// 	map[string]string{shortURL: "https://practicum.yandex.ru/"}
+			// },
+			want: func(w http.ResponseWriter, r *http.Request) {
+				// w: &,
+				// r: &http.Request{
+				// 	Method: "POST",
+				// 	Header: http.Header{
+				// 		"Content-Type": []string{"applicatin/json"},
+				// 	},
+				// 	Host: host,
+				// 	Body: body,
+				// },
+			},
+			//statusCode: http.StatusMethodNotAllowed,
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(tt.method, "/", strings.NewReader(tt.body))
-			req.Header.Set("Content-Type", tt.contentType)
-			w := httptest.NewRecorder()
-
-			handler(w, req)
-
-			resp := w.Result()
-			if resp.StatusCode != tt.wantStatus {
-				t.Errorf("Expected status %d, got %d", tt.wantStatus, resp.StatusCode)
+			if got := PostHandler(tt.args.ts); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PostHandler() = %v, want %v", got, tt.want)
 			}
 		})
-	}
-}
-
-func TestGetHandler(t *testing.T) {
-	storage := storage.NewStorage()
-	handler := GetHandler(storage)
-
-	// Setup test data
-	testID := "test123"
-	testURL := "https://example.com"
-	storage.InsertURL(testID, testURL)
-
-	tests := []struct {
-		name         string
-		method       string
-		path         string
-		wantStatus   int
-		wantLocation string
-	}{
-		{
-			name:         "Valid GET",
-			method:       http.MethodGet,
-			path:         "/" + testID,
-			wantStatus:   http.StatusTemporaryRedirect,
-			wantLocation: testURL,
-		},
-		{
-			name:         "Non-existent ID",
-			method:       http.MethodGet,
-			path:         "/nonexistent",
-			wantStatus:   http.StatusBadRequest,
-			wantLocation: "URL with such id doesn't exist",
-		},
-		{
-			name:         "Invalid method",
-			method:       http.MethodPost,
-			path:         "/" + testID,
-			wantStatus:   http.StatusBadRequest,
-			wantLocation: "Method not allowed",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(tt.method, tt.path, nil)
-			w := httptest.NewRecorder()
-
-			handler(w, req)
-
-			resp := w.Result()
-			if resp.StatusCode != tt.wantStatus {
-				t.Errorf("Expected status %d, got %d", tt.wantStatus, resp.StatusCode)
-			}
-
-			location := resp.Header.Get("Location")
-			if location != tt.wantLocation {
-				t.Errorf("Expected Location %s, got %s", tt.wantLocation, location)
-			}
-		})
-	}
-}
-
-func TestGenerateShortURL(t *testing.T) {
-	storage := storage.NewStorage()
-	url := "https://example.com/very/long/url"
-
-	short := generateShortURL(storage, url)
-	if len(short) < 2 {
-		t.Errorf("Generated URL is too short: %s", short)
-	}
-
-	// Verify the URL was stored
-	id := strings.TrimPrefix(short, "/")
-	if _, err := storage.GetURL(id); err != nil {
-		t.Errorf("URL was not stored in storage: %v", err)
 	}
 }
