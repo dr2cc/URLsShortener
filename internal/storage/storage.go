@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-type Storage interface {
+type Storager interface {
 	InsertURL(uid string, url string) error
 	GetURL(uid string) (string, error)
 }
@@ -32,11 +32,11 @@ func (s *URLStorage) GetURL(uid string) (string, error) {
 	return e, nil
 }
 
-// Реализую интерфейс Storage
-func MakeEntry(s Storage, uid string, url string) {
+// Реализую интерфейс Storager
+func MakeEntry(s Storager, uid string, url string) {
 	s.InsertURL(uid, url)
 }
 
-func GetEntry(s Storage, uid string) (string, error) {
+func GetEntry(s Storager, uid string) (string, error) {
 	return s.GetURL(uid)
 }
