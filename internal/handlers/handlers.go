@@ -30,6 +30,7 @@ func generateShortURL(urlList *storage.URLStorage, longURL string) string {
 	return "/" + id
 }
 
+// Функция PostHandler уровня пакета handlers
 func PostHandler(ts *storage.URLStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		param, err := io.ReadAll(req.Body)
@@ -49,6 +50,7 @@ func PostHandler(ts *storage.URLStorage) http.HandlerFunc {
 	}
 }
 
+// Функция GetHandler уровня пакета handlers
 func GetHandler(ts *storage.URLStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		id := strings.TrimPrefix(req.RequestURI, "/")
