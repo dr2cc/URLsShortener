@@ -12,7 +12,10 @@ func main() {
 	storageInstance := storage.NewStorage()
 
 	mux.HandleFunc("POST /{$}", handlers.PostHandler(storageInstance))
-	mux.HandleFunc("GET /{id}", handlers.GetHandler(storageInstance))
+	//mux.HandleFunc("GET /{id}", handlers.GetHandler(storageInstance))
+
+	// Работает и так и так! Славься Керниган!!
+	mux.HandleFunc("GET /{id}", storageInstance.GetHandler)
 
 	http.ListenAndServe(":8080", mux)
 }
