@@ -15,6 +15,8 @@ func main() {
 	//mux.HandleFunc("GET /{id}", handlers.GetHandler(storageInstance))
 
 	// Работает и так и так! Славься Керниган!!
+	// 04.05.25 и автотесты прошел!. Верхний конечно логичнее.
+	// Пока оставлю и так и так, как упражнение
 	mux.HandleFunc("GET /{id}", storageInstance.GetHandler)
 
 	http.ListenAndServe(":8080", mux)
