@@ -135,24 +135,24 @@ func TestURLStorage_PostHandler(t *testing.T) {
 		// 	},
 		// 	statusCode: http.StatusBadRequest,
 		// },
-		{
-			name: "bad header",
-			ts: &URLStorage{
-				Data: record,
-			},
-			args: args{
-				w: httptest.NewRecorder(),
-				req: &http.Request{
-					Method: "POST",
-					Header: http.Header{
-						"Content-Type": []string{"applicatin/json"},
-					},
-					Host: host,
-					Body: body,
-				},
-			},
-			statusCode: http.StatusBadRequest,
-		},
+		// {
+		// 	name: "bad header",
+		// 	ts: &URLStorage{
+		// 		Data: record,
+		// 	},
+		// 	args: args{
+		// 		w: httptest.NewRecorder(),
+		// 		req: &http.Request{
+		// 			Method: "POST",
+		// 			Header: http.Header{
+		// 				"Content-Type": []string{"applicatin/json"},
+		// 			},
+		// 			Host: host,
+		// 			Body: body,
+		// 		},
+		// 	},
+		// 	statusCode: http.StatusBadRequest,
+		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

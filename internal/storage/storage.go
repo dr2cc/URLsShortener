@@ -63,24 +63,25 @@ func (s *URLStorage) PostHandler(w http.ResponseWriter, req *http.Request) {
 	// Автотесты не проходили на еще одном уровне switch
 	//не знаю как на этом, но без него проходит любой тип контента,
 	//а возвратиться может только text
-	switch req.Header.Get("Content-Type") {
-	case "text/plain":
-		//param - тело запроса (тип []byte)
-		param, err := io.ReadAll(req.Body)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		// Генерирую ответ и создаю запись в хранилище
-		response := "http://" + req.Host + generateShortURL(s, string(param))
-
-		w.WriteHeader(http.StatusCreated)
-		fmt.Fprint(w, response)
-	default:
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Content-Type isn`t text/plain")
+	//
+	// switch req.Header.Get("Content-Type") {
+	// case "text/plain":
+	//param - тело запроса (тип []byte)
+	param, err := io.ReadAll(req.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
+
+	// Генерирую ответ и создаю запись в хранилище
+	response := "http://" + req.Host + generateShortURL(s, string(param))
+
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprint(w, response)
+	// default:
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	fmt.Fprint(w, "Content-Type isn`t text/plain")
+	// }
 }
 
 // !!!Попробовать пройти автотесты с этим методом!!
