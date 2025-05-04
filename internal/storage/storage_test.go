@@ -7,6 +7,8 @@ import (
 	"testing"
 )
 
+// 04.05.25 автотесты прошли!
+// Закончить здесь, а затем перенести в handler
 func TestURLStorage_GetHandler(t *testing.T) {
 	tt := []struct {
 		name       string
