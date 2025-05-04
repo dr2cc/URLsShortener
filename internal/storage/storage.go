@@ -39,7 +39,7 @@ func (s *URLStorage) GetURL(uid string) (string, error) {
 // метод GetHandler типа *URLStorage
 // Получается, что так логичнее если нет пакета handlers !!
 // А если есть, то правильнее функция уровня пакета (?!?)
-func (ts *URLStorage) GetHandler(w http.ResponseWriter, req *http.Request) {
+func (u *URLStorage) GetHandler(w http.ResponseWriter, req *http.Request) {
 	//Тесты подсказали добавить проверку на метод:
 	switch req.Method {
 	case http.MethodGet:
@@ -51,7 +51,7 @@ func (ts *URLStorage) GetHandler(w http.ResponseWriter, req *http.Request) {
 		id := strings.TrimPrefix(req.RequestURI, "/")
 
 		//Реализую интерфейс
-		longURL, err := GetEntry(ts, id)
+		longURL, err := GetEntry(u, id)
 
 		if err != nil {
 			//http.Error(w, "URL not found", http.StatusBadRequest)
