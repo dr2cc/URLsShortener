@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"bytes"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -74,96 +76,96 @@ func TestURLStorage_GetHandler(t *testing.T) {
 }
 
 // Основной каркас сгенерирован VSCode
-// func TestURLStorage_PostHandler(t *testing.T) {
-// 	type args struct {
-// 		//w   http.ResponseWriter
-// 		w   *httptest.ResponseRecorder
-// 		req *http.Request
-// 	}
+func TestURLStorage_PostHandler(t *testing.T) {
+	type args struct {
+		//w   http.ResponseWriter
+		w   *httptest.ResponseRecorder
+		req *http.Request
+	}
 
-// 	//Здесь стандартно передаваемые ("правильные") данные, вне теста получаемые от клиента
-// 	host := "localhost:8080"
-// 	shortURL := "6ba7b811"
-// 	record := map[string]string{shortURL: "https://practicum.yandex.ru/"}
-// 	body := io.NopCloser(bytes.NewBuffer([]byte(record[shortURL])))
+	//Здесь стандартно передаваемые ("правильные") данные, вне теста получаемые от клиента
+	host := "localhost:8080"
+	shortURL := "6ba7b811"
+	record := map[string]string{shortURL: "https://practicum.yandex.ru/"}
+	body := io.NopCloser(bytes.NewBuffer([]byte(record[shortURL])))
 
-// 	tests := []struct {
-// 		name string
-// 		ts   *URLStorage
-// 		args args
-// 		//
-// 		statusCode int
-// 	}{
-// 		{
-// 			name: "all good",
-// 			ts: &URLStorage{
-// 				Data: record,
-// 			},
-// 			args: args{
-// 				w: httptest.NewRecorder(),
-// 				//req: httptest.NewRequest("POST", "/6ba7b811", nil),
-// 				req: &http.Request{
-// 					Method: "POST",
-// 					Header: http.Header{
-// 						"Content-Type": []string{"text/plain"},
-// 					},
-// 					Host: host,
-// 					Body: body,
-// 				},
-// 			},
-// 			//если все нормально:
-// 			//возвращает статус с кодом 201 (http.StatusCreated)
-// 			statusCode: http.StatusCreated,
-// 		},
-// 		// {
-// 		// 	name: "bad method",
-// 		// 	ts: &URLStorage{
-// 		// 		Data: record,
-// 		// 	},
-// 		// 	args: args{
-// 		// 		w: httptest.NewRecorder(),
-// 		// 		req: &http.Request{
-// 		// 			Method: "GET",
-// 		// 			Header: http.Header{
-// 		// 				"Content-Type": []string{"text/plain"},
-// 		// 			},
-// 		// 			Host: host,
-// 		// 			Body: body,
-// 		// 		},
-// 		// 	},
-// 		// 	statusCode: http.StatusBadRequest,
-// 		// },
-// 		{
-// 			name: "bad header",
-// 			ts: &URLStorage{
-// 				Data: record,
-// 			},
-// 			args: args{
-// 				w: httptest.NewRecorder(),
-// 				req: &http.Request{
-// 					Method: "POST",
-// 					Header: http.Header{
-// 						"Content-Type": []string{"applicatin/json"},
-// 					},
-// 					Host: host,
-// 					Body: body,
-// 				},
-// 			},
-// 			statusCode: http.StatusBadRequest,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			tt.ts.PostHandler(tt.args.w, tt.args.req)
-// 			//Проверяю статус
-// 			if tt.args.w.Code != tt.statusCode {
-// 				t.Errorf("Want status '%d', got '%d'", tt.statusCode, tt.args.w.Code)
-// 			}
-// 			// //Здесь проверял содержимое body
-// 			// //Когда починил рандомайзер, стала бессмысленной
-// 			// if strings.TrimSpace(tt.args.w.Body.String()) != tt.want {
-// 			// 	t.Errorf("Want '%s', got '%s'", tt.want, tt.args.w.Body)
-// 			// }
-// 		})
-// 	}
-// }
+	tests := []struct {
+		name string
+		ts   *URLStorage
+		args args
+		//
+		statusCode int
+	}{
+		{
+			name: "all good",
+			ts: &URLStorage{
+				Data: record,
+			},
+			args: args{
+				w: httptest.NewRecorder(),
+				//req: httptest.NewRequest("POST", "/6ba7b811", nil),
+				req: &http.Request{
+					Method: "POST",
+					Header: http.Header{
+						"Content-Type": []string{"text/plain"},
+					},
+					Host: host,
+					Body: body,
+				},
+			},
+			//если все нормально:
+			//возвращает статус с кодом 201 (http.StatusCreated)
+			statusCode: http.StatusCreated,
+		},
+		// {
+		// 	name: "bad method",
+		// 	ts: &URLStorage{
+		// 		Data: record,
+		// 	},
+		// 	args: args{
+		// 		w: httptest.NewRecorder(),
+		// 		req: &http.Request{
+		// 			Method: "GET",
+		// 			Header: http.Header{
+		// 				"Content-Type": []string{"text/plain"},
+		// 			},
+		// 			Host: host,
+		// 			Body: body,
+		// 		},
+		// 	},
+		// 	statusCode: http.StatusBadRequest,
+		// },
+		{
+			name: "bad header",
+			ts: &URLStorage{
+				Data: record,
+			},
+			args: args{
+				w: httptest.NewRecorder(),
+				req: &http.Request{
+					Method: "POST",
+					Header: http.Header{
+						"Content-Type": []string{"applicatin/json"},
+					},
+					Host: host,
+					Body: body,
+				},
+			},
+			statusCode: http.StatusBadRequest,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.ts.PostHandler(tt.args.w, tt.args.req)
+			//Проверяю статус
+			if tt.args.w.Code != tt.statusCode {
+				t.Errorf("Want status '%d', got '%d'", tt.statusCode, tt.args.w.Code)
+			}
+			// //Здесь проверял содержимое body
+			// //Когда починил рандомайзер, стала бессмысленной
+			// if strings.TrimSpace(tt.args.w.Body.String()) != tt.want {
+			// 	t.Errorf("Want '%s', got '%s'", tt.want, tt.args.w.Body)
+			// }
+		})
+	}
+}
