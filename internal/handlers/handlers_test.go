@@ -2,79 +2,112 @@ package handlers
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/dr2cc/URLsShortener.git/internal/storage"
 )
 
-// 04.05.25 автотесты прошли!
-// Закончить здесь, а затем перенести в handler
-// func TestGetHandler(t *testing.T) {
-// 	tt := []struct {
-// 		name       string
-// 		method     string
-// 		input      *storage.URLStorage
-// 		want       string
-// 		statusCode int
-// 	}{
-// 		{
-// 			name:   "all good",
-// 			method: http.MethodGet,
-// 			input: &storage.URLStorage{
-// 				Data: map[string]string{"6ba7b811": "https://practicum.yandex.ru/"},
-// 			},
-// 			want:       "https://practicum.yandex.ru/",
-// 			statusCode: http.StatusTemporaryRedirect,
-// 		},
-// 		{
-// 			name:   "with bad method",
-// 			method: http.MethodPost,
-// 			input: &storage.URLStorage{
-// 				Data: map[string]string{"6ba7b811": "https://practicum.yandex.ru/"},
-// 			},
-// 			want:       "Method not allowed",
-// 			statusCode: http.StatusBadRequest,
-// 		},
-// 		// {
-// 		// 	name:   "key in input does not match /6ba7b811",
-// 		// 	method: http.MethodGet,
-// 		// 	input: &URLStorage{
-// 		// 		Data: map[string]string{"6ba7b81": "https://practicum.yandex.ru/"},
-// 		// 	},
-// 		// 	want:       "URL with such id doesn`t exist",
-// 		// 	statusCode: http.StatusBadRequest,
-// 		// },
-// 	}
+func TestGetHandler(t *testing.T) {
+	//Здесь стандартно передаваемые ("правильные") данные, вне теста получаемые от клиента
+	//host := "localhost:8080"
+	shortURL := "6ba7b811"
+	record := map[string]string{shortURL: "https://practicum.yandex.ru/"}
+	body := io.NopCloser(bytes.NewBuffer([]byte(record[shortURL])))
 
-// 	for _, tc := range tt {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			responseRecorder := httptest.NewRecorder()
-// 			// //Если запрос от клиента, то можно использовать пакет http. Не сработало..
-// 			// request, _ := http.NewRequest(tc.method, "/6ba7b811", nil)
-// 			request := httptest.NewRequest(tc.method, "/6ba7b811", nil)
-// 			// Вызываем метод GetHandler структуры URLStorage (input)
-// 			// Этот метод делает запись в responseRecorder
-// 			tc.input.GetHandler(responseRecorder, request)
+	tests := []struct {
+		name       string
+		method     string
+		input      *storage.URLStorage
+		want       string
+		wantStatus int
+	}{
+		{
+			name:   "all good",
+			method: http.MethodGet,
+			input: &storage.URLStorage{
+				Data: record,
+			},
+			want:       "https://practicum.yandex.ru/",
+			wantStatus: http.StatusTemporaryRedirect,
+		},
+		{
+			name:   "with bad method",
+			method: http.MethodPost,
+			input: &storage.URLStorage{
+				Data: record,
+			},
+			want:       "Method not allowed",
+			wantStatus: http.StatusBadRequest,
+		},
+		// {
+		// 	name:   "key in input does not match /6ba7b811",
+		// 	method: http.MethodGet,
+		//  input: &storage.URLStorage{
+		// 	    Data: record,
+		//  },
+		// 	want:       "URL with such id doesn`t exist",
+		// 	wantStatus: http.StatusBadRequest,
+		// },
+	}
 
-// 			// По заданию на конечную точку с методом GET в инкременте 1
-// 			// в случае успешной обработки запроса сервер возвращает:
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// responseRecorder := httptest.NewRecorder()
+			// // //Если запрос от клиента, то можно использовать пакет http. Не сработало..
+			// // request, _ := http.NewRequest(tc.method, "/6ba7b811", nil)
+			// request := httptest.NewRequest(tc.method, "/6ba7b811", nil)
+			// // Вызываем метод GetHandler структуры URLStorage (input)
+			// // Этот метод делает запись в responseRecorder
+			// tc.input.GetHandler(responseRecorder, request)
 
-// 			// статус с кодом 307, должен совпадать с тем, что описан в statusCode
-// 			if responseRecorder.Code != tc.statusCode {
-// 				t.Errorf("Want status '%d', got '%d'", tc.statusCode, responseRecorder.Code)
-// 			}
+			// // По заданию на конечную точку с методом GET в инкременте 1
+			// // в случае успешной обработки запроса сервер возвращает:
 
-// 			// URL (переданный в input) в заголовке "Location", в случае ошибки,
-// 			// сообщение о ошибке должно совпадать с want
-// 			if strings.TrimSpace(responseRecorder.Header()["Location"][0]) != tc.want {
-// 				t.Errorf("Want '%s', got '%s'", tc.want, responseRecorder.Body)
-// 			}
-// 		})
-// 	}
-// }
+			// // статус с кодом 307, должен совпадать с тем, что описан в statusCode
+			// if responseRecorder.Code != tc.statusCode {
+			// 	t.Errorf("Want status '%d', got '%d'", tc.statusCode, responseRecorder.Code)
+			// }
+
+			//***************************
+
+			req, err := http.NewRequest(tt.method, "localhost:8080/"+shortURL, body) //("POST", "/users/123", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			rr := httptest.NewRecorder()
+
+			handler := http.HandlerFunc(GetHandler(tt.input))
+
+			handler.ServeHTTP(rr, req)
+			//***************************
+			//Не могу включить отладку в handlers, попробую проверить тут
+			//это методы из handlers.GetHandler
+			id := strings.TrimPrefix(req.RequestURI, "/")
+			longURL, err := storage.GetEntry(tt.input, id)
+			fmt.Println("Получаю запись из хранилища:" + longURL)
+			//05.05.2025 нет никакого longURL. Видимо тут и ошибка
+			//****************************
+
+			if gotStatus := rr.Code; gotStatus != tt.wantStatus {
+				t.Errorf("Want status '%d', got '%d'", tt.wantStatus, gotStatus)
+			}
+
+			//***********
+
+			// URL (переданный в input) в заголовке "Location", в случае ошибки,
+			// сообщение о ошибке должно совпадать с want
+			if gotLocation := strings.TrimSpace(rr.Header()["Location"][0]); gotLocation != tt.want {
+				t.Errorf("Want location'%s', got '%s'", tt.want, gotLocation)
+			}
+		})
+	}
+}
 
 func TestPostHandler(t *testing.T) {
 	// type args struct {
