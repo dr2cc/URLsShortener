@@ -61,9 +61,9 @@ func generateShortURL(urlList *URLStorage, longURL string) string {
 // тип *URLStorage и его метод PostHandler
 func (s *URLStorage) PostHandler(w http.ResponseWriter, req *http.Request) {
 	// Автотесты не проходили на еще одном уровне switch
-	//не знаю как на этом, но без него проходит любой тип контента,
-	//а возвратиться может только text
-	//
+	//Без этого switch проходит любой тип контента,
+	//а возвратиться может только text, получается ерунда.
+	// //Но с этим switch автотесты тоже не проходят
 	// switch req.Header.Get("Content-Type") {
 	// case "text/plain":
 	//param - тело запроса (тип []byte)
