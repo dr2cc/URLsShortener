@@ -1,0 +1,29 @@
+package handlers
+
+import (
+	"net/http"
+	"reflect"
+	"testing"
+
+	"github.com/dr2cc/URLsShortener.git/internal/storage"
+)
+
+func TestPostHandler(t *testing.T) {
+	type args struct {
+		ts *storage.URLStorage
+	}
+	tests := []struct {
+		name string
+		args args
+		want http.HandlerFunc
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := PostHandler(tt.args.ts); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PostHandler() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
