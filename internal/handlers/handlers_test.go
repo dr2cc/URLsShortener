@@ -12,7 +12,7 @@ import (
 
 // 04.05.25 автотесты прошли!
 // Закончить здесь, а затем перенести в handler
-// func TestURLStorage_GetHandler(t *testing.T) {
+// func TestGetHandler(t *testing.T) {
 // 	tt := []struct {
 // 		name       string
 // 		method     string
@@ -76,7 +76,6 @@ import (
 // 	}
 // }
 
-// Основной каркас сгенерирован VSCode
 func TestPostHandler(t *testing.T) {
 	// type args struct {
 	// 	//w   http.ResponseWriter
@@ -138,23 +137,6 @@ func TestPostHandler(t *testing.T) {
 		// },
 	}
 
-	// //******Работает!*******************************************
-	// req, err := http.NewRequest("POST", host, body) //("POST", "/users/123", nil)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-
-	// rr := httptest.NewRecorder()
-	// handler := http.HandlerFunc(PostHandler(&storage.URLStorage{Data: record}))
-
-	// handler.ServeHTTP(rr, req)
-
-	// //200 = StatusOK
-	// if status := rr.Code; status != http.StatusCreated {
-	// 	t.Errorf("Expected status 201, got %v", status)
-	// }
-	// //*******************************************************************
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req, err := http.NewRequest(tt.method, host, body) //("POST", "/users/123", nil)
@@ -163,22 +145,14 @@ func TestPostHandler(t *testing.T) {
 			}
 
 			rr := httptest.NewRecorder()
-			//&storage.URLStorage{Data: record}
+
 			handler := http.HandlerFunc(PostHandler(tt.ts))
 
 			handler.ServeHTTP(rr, req)
 
-			//200 = StatusOK
 			if status := rr.Code; status != tt.statusCode {
-				//t.Errorf("Expected status 201, got %v", status)
 				t.Errorf("Want status '%d', got '%d'", status, tt.statusCode)
 			}
-
-			// if got := PostHandler(tt.ts); !reflect.DeepEqual(got, tt.statusCode) {
-			// 	//t.Errorf("PostHandler() = %v, want %v", got, tt.want)
-			// 	t.Errorf("Want status '%d', got '%d'", tt.statusCode, tt.args.w.Code)
-			// }
-
 		})
 	}
 }
