@@ -33,35 +33,48 @@ func generateShortURL(urlList *storage.URLStorage, longURL string) string {
 // Функция PostHandler уровня пакета handlers
 func PostHandler(ts *storage.URLStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		param, err := io.ReadAll(req.Body)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+		switch req.Method {
+		case http.MethodPost:
+			param, err := io.ReadAll(req.Body)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			// Преобразуем тело запроса (тип []byte) в строку:
+			longURL := string(param)
+			// Генерируем сокращённый URL и создаем запись в нашем хранилище
+			shortURL := "http://" + req.Host + generateShortURL(ts, longURL)
+
+			// Устанавливаем статус ответа 201
+			w.WriteHeader(http.StatusCreated)
+			fmt.Fprint(w, shortURL)
+
+		default:
+			w.Header().Set("Location", "Method not allowed")
+			w.WriteHeader(http.StatusBadRequest)
 		}
-
-		// Преобразуем тело запроса (тип []byte) в строку:
-		longURL := string(param)
-		// Генерируем сокращённый URL и создаем запись в нашем хранилище
-		shortURL := "http://" + req.Host + generateShortURL(ts, longURL)
-
-		// Устанавливаем статус ответа 201
-		w.WriteHeader(http.StatusCreated)
-		fmt.Fprint(w, shortURL)
 	}
 }
 
 // Функция GetHandler уровня пакета handlers
 func GetHandler(ts *storage.URLStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		id := strings.TrimPrefix(req.RequestURI, "/")
-		longURL, err := storage.GetEntry(ts, id)
-		if err != nil {
-			w.Header().Set("Location", err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
+		switch req.Method {
+		case http.MethodGet:
+			id := strings.TrimPrefix(req.RequestURI, "/")
+			longURL, err := storage.GetEntry(ts, id)
+			if err != nil {
+				w.Header().Set("Location", err.Error())
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
 
-		w.Header().Set("Location", longURL)
-		w.WriteHeader(http.StatusTemporaryRedirect)
+			w.Header().Set("Location", longURL)
+			w.WriteHeader(http.StatusTemporaryRedirect)
+		default:
+			w.Header().Set("Location", "Method not allowed")
+			w.WriteHeader(http.StatusBadRequest)
+		}
 	}
 }

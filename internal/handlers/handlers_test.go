@@ -106,15 +106,15 @@ func TestPostHandler(t *testing.T) {
 			method:     "POST",
 			statusCode: http.StatusCreated,
 		},
-		// {
-		// 	name: "bad method",
-		// 	ts: &storage.URLStorage{
-		// 		Data: record,
-		// 	},
-		// 	method: "GET",
+		{
+			name: "bad method",
+			ts: &storage.URLStorage{
+				Data: record,
+			},
+			method: "GET",
 
-		// 	statusCode: http.StatusBadRequest,
-		// },
+			statusCode: http.StatusBadRequest,
+		},
 
 		// //Оставляю до сдачи инкремента 1
 		// {
