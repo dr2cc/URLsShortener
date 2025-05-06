@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"bytes"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -15,7 +13,6 @@ func TestGetHandler(t *testing.T) {
 	//Здесь общие для всех тестов данные
 	shortURL := "6ba7b811"
 	record := map[string]string{shortURL: "https://practicum.yandex.ru/"}
-	body := io.NopCloser(bytes.NewBuffer([]byte(record[shortURL])))
 
 	tests := []struct {
 		name       string
@@ -55,10 +52,7 @@ func TestGetHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// // Здесь не получается использовать
-			// req := http.NewRequest(tt.method, "/"+shortURL, body)
-			req := httptest.NewRequest(tt.method, "/"+shortURL, body)
-
+			req := httptest.NewRequest(tt.method, "/"+shortURL, nil) //body)
 			rr := httptest.NewRecorder()
 			//***************************
 			//Создаю экземпляр хранилища
@@ -92,10 +86,8 @@ func TestPostHandler(t *testing.T) {
 	// }
 
 	//Здесь общие для всех тестов данные
-	host := "localhost:8080"
 	shortURL := "6ba7b811"
 	record := map[string]string{shortURL: "https://practicum.yandex.ru/"}
-	body := io.NopCloser(bytes.NewBuffer([]byte(record[shortURL])))
 
 	tests := []struct {
 		name   string
@@ -147,14 +139,17 @@ func TestPostHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Здесь использование
-			// http.NewRequest(tt.method, host, body)
-			// выполняет тесты, а в TestGetHandler нет! Там только
-			// httptest.NewRequest(tt.method, "/"+shortURL, body)
-			req, err := http.NewRequest(tt.method, host, body) //("POST", "/users/123", nil)
-			if err != nil {
-				t.Fatal(err)
-			}
+			// //Здесь использование
+			// req, err := http.NewRequest(tt.method, host, body) //("POST", "/users/123", nil)
+			// if err != nil {
+			// 	t.Fatal(err)
+			// }
+			// // Позволяло пройти тесты,
+			// // хотя host (со значением:= "localhost:8080") здесь это бред, он не давал нужных данных
+			// // Данные видимо получались из
+			// // body := io.NopCloser(bytes.NewBuffer([]byte(record[shortURL])))
+			// // Но body спокойно заменилось nil , когда target:= "/"+shortURL)
+			req := httptest.NewRequest(tt.method, "/"+shortURL, nil)
 
 			rr := httptest.NewRecorder()
 
