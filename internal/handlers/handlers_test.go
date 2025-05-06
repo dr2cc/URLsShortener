@@ -12,8 +12,7 @@ import (
 )
 
 func TestGetHandler(t *testing.T) {
-	//Здесь стандартно передаваемые ("правильные") данные, вне теста получаемые от клиента
-	//host := "localhost:8080"
+	//Здесь общие для всех тестов данные
 	shortURL := "6ba7b811"
 	record := map[string]string{shortURL: "https://practicum.yandex.ru/"}
 	body := io.NopCloser(bytes.NewBuffer([]byte(record[shortURL])))
@@ -43,41 +42,22 @@ func TestGetHandler(t *testing.T) {
 			want:       "Method not allowed",
 			wantStatus: http.StatusBadRequest,
 		},
-		// {
-		// 	name:   "key in input does not match /6ba7b811",
-		// 	method: http.MethodGet,
-		//  input: &storage.URLStorage{
-		// 	    Data: record,
-		//  },
-		// 	want:       "URL with such id doesn`t exist",
-		// 	wantStatus: http.StatusBadRequest,
-		// },
+		{
+			name:   "key in input does not match /6ba7b811",
+			method: http.MethodGet,
+			input: &storage.URLStorage{
+				Data: map[string]string{"6ba7b81": "https://practicum.yandex.ru/"},
+			},
+			want:       "URL with such id doesn't exist",
+			wantStatus: http.StatusBadRequest,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// responseRecorder := httptest.NewRecorder()
-			// // //Если запрос от клиента, то можно использовать пакет http. Не сработало..
-			// // request, _ := http.NewRequest(tc.method, "/6ba7b811", nil)
-			// request := httptest.NewRequest(tc.method, "/6ba7b811", nil)
-			// // Вызываем метод GetHandler структуры URLStorage (input)
-			// // Этот метод делает запись в responseRecorder
-			// tc.input.GetHandler(responseRecorder, request)
-
-			// // По заданию на конечную точку с методом GET в инкременте 1
-			// // в случае успешной обработки запроса сервер возвращает:
-
-			// // статус с кодом 307, должен совпадать с тем, что описан в statusCode
-			// if responseRecorder.Code != tc.statusCode {
-			// 	t.Errorf("Want status '%d', got '%d'", tc.statusCode, responseRecorder.Code)
-			// }
-
-			//***************************
-
-			req, err := http.NewRequest(tt.method, "localhost:8080/"+shortURL, body) //("POST", "/users/123", nil)
-			if err != nil {
-				t.Fatal(err)
-			}
+			// // Здесь не получается использовать
+			// req := http.NewRequest(tt.method, "/"+shortURL, body)
+			req := httptest.NewRequest(tt.method, "/"+shortURL, body)
 
 			rr := httptest.NewRecorder()
 			//***************************
@@ -85,11 +65,8 @@ func TestGetHandler(t *testing.T) {
 			//05.05.2025- это не нужно!
 			// работает только потому, что в реквесте не правильные данные
 			// они пустые, вот и находят по пустому ключу!!
-			//
-			//id := strings.TrimPrefix(req.RequestURI, "/")
-			//здесь в тесте уже в tt.input есть все нужные данные
-			//storage.MakeEntry(tt.input, id, "https://practicum.yandex.ru/")
-			storage.MakeEntry(tt.input, "", "https://practicum.yandex.ru/")
+			//storage.MakeEntry(tt.input, "", "https://practicum.yandex.ru/")
+			//!!!Вызов MakeEntry использовать для теста в storage
 			//***************************
 			handler := http.HandlerFunc(GetHandler(tt.input))
 
@@ -99,10 +76,7 @@ func TestGetHandler(t *testing.T) {
 				t.Errorf("Want status '%d', got '%d'", tt.wantStatus, gotStatus)
 			}
 
-			//***********
-
-			// URL (переданный в input) в заголовке "Location", в случае ошибки,
-			// сообщение о ошибке должно совпадать с want
+			// Ожидаемое (want) сообщение о ошибке должно совпадать с получаемым (got)
 			if gotLocation := strings.TrimSpace(rr.Header()["Location"][0]); gotLocation != tt.want {
 				t.Errorf("Want location'%s', got '%s'", tt.want, gotLocation)
 			}
@@ -117,7 +91,7 @@ func TestPostHandler(t *testing.T) {
 	// 	req *http.Request
 	// }
 
-	//Здесь стандартно передаваемые ("правильные") данные, вне теста получаемые от клиента
+	//Здесь общие для всех тестов данные
 	host := "localhost:8080"
 	shortURL := "6ba7b811"
 	record := map[string]string{shortURL: "https://practicum.yandex.ru/"}
@@ -151,7 +125,7 @@ func TestPostHandler(t *testing.T) {
 
 		// //Оставляю до сдачи инкремента 1
 		// {
-		// 	name: "bad header",
+		// 	name: "invalid data type in query body- json",
 		// 	ts: &storage.URLStorage{
 		// 		Data: record,
 		// 	},
@@ -173,6 +147,10 @@ func TestPostHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Здесь использование
+			// http.NewRequest(tt.method, host, body)
+			// выполняет тесты, а в TestGetHandler нет! Там только
+			// httptest.NewRequest(tt.method, "/"+shortURL, body)
 			req, err := http.NewRequest(tt.method, host, body) //("POST", "/users/123", nil)
 			if err != nil {
 				t.Fatal(err)
