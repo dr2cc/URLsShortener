@@ -60,21 +60,21 @@ func PostHandler(us *storage.URLStorage) http.HandlerFunc {
 // Функция GetHandler уровня пакета handlers
 func GetHandler(us *storage.URLStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		switch req.Method {
-		case http.MethodGet:
-			id := strings.TrimPrefix(req.RequestURI, "/")
-			url, err := storage.GetEntry(us, id)
-			if err != nil {
-				w.Header().Set("Location", err.Error())
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			w.Header().Set("Location", url)
-			w.WriteHeader(http.StatusTemporaryRedirect)
-		default:
-			w.Header().Set("Location", "Method not allowed")
+		// switch req.Method {
+		// case http.MethodGet:
+		id := strings.TrimPrefix(req.RequestURI, "/")
+		url, err := storage.GetEntry(us, id)
+		if err != nil {
+			w.Header().Set("Location", err.Error())
 			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
+
+		w.Header().Set("Location", url)
+		w.WriteHeader(http.StatusTemporaryRedirect)
+		// default:
+		// 	w.Header().Set("Location", "Method not allowed")
+		// 	w.WriteHeader(http.StatusBadRequest)
+		// }
 	}
 }
