@@ -1,0 +1,24 @@
+package server
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/dr2cc/URLsShortener.git/internal/config"
+	"github.com/dr2cc/URLsShortener.git/internal/handlers"
+	"github.com/dr2cc/URLsShortener.git/internal/storage"
+	"github.com/go-chi/chi"
+)
+
+// инициализации зависимостей сервера перед запуском
+func Run() error {
+	mux := chi.NewRouter()
+
+	storageInstance := storage.NewStorage()
+
+	mux.Post("/", handlers.PostHandler(storageInstance))
+	mux.Get("/{id}", handlers.GetHandler(storageInstance))
+
+	fmt.Println("Running server on", config.FlagRunAddr)
+	return http.ListenAndServe(config.FlagRunAddr, mux)
+}
