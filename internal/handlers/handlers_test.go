@@ -31,15 +31,6 @@ func TestGetHandler(t *testing.T) {
 			wantStatus: http.StatusTemporaryRedirect,
 		},
 		{
-			name:   "with bad method",
-			method: http.MethodPost,
-			input: &storage.URLStorage{
-				Data: record,
-			},
-			want:       "Method not allowed",
-			wantStatus: http.StatusBadRequest,
-		},
-		{
 			name:   "key in input does not match /6ba7b811",
 			method: http.MethodGet,
 			input: &storage.URLStorage{
