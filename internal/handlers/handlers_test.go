@@ -62,7 +62,7 @@ func TestGetHandler(t *testing.T) {
 }
 
 func TestPostHandler(t *testing.T) {
-	//Здесь общие для всех тестов данные
+	//Здесь общие для всех тестов данные.
 	shortURL := "6ba7b811"
 	record := map[string]string{shortURL: "https://practicum.yandex.ru/"}
 
