@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/dr2cc/URLsShortener.git/internal/config"
@@ -19,6 +18,6 @@ func Run() error {
 	mux.Post("/", handlers.PostHandler(storageInstance))
 	mux.Get("/{id}", handlers.GetHandler(storageInstance))
 
-	fmt.Println("Running server on", config.FlagRunAddr)
+	//fmt.Println("Running server on", config.FlagRunAddr)
 	return http.ListenAndServe(config.FlagRunAddr, mux)
 }
