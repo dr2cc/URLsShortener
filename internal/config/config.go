@@ -2,7 +2,6 @@ package config
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -28,12 +27,12 @@ func ParseFlags() {
 	flag.Parse()
 	// Добавляю переменные окружения
 	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
-		fmt.Println(envRunAddr)
+		//fmt.Println(envRunAddr)
 		FlagRunAddr = envRunAddr
 	}
 
 	if envURL := os.Getenv("BASE_URL"); envURL != "" {
-		fmt.Println(envURL)
+		//fmt.Println(envURL)
 		FlagURL = envURL
 	}
 }
