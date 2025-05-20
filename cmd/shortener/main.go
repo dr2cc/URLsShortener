@@ -19,7 +19,7 @@ const (
 )
 
 func main() {
-	//из примера
+	// из примера
 	cfg := config.MustLoad()
 
 	//
