@@ -15,7 +15,8 @@ type Storage struct {
 
 // Конструктор объекта Storage
 func New(storagePath string) (*Storage, error) {
-	const op = "storage.sqlite.NewStorage" // Имя текущей функции для логов и ошибок
+	//const op = "storage.sqlite.NewStorage" // Имя текущей функции для логов и ошибок
+	const op = "storage.sqlite.New"
 
 	db, err := sql.Open("sqlite3", storagePath) // Подключаемся к БД
 	if err != nil {
@@ -54,7 +55,7 @@ func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 	// Выполняем запрос
 	res, err := stmt.Exec(urlToSave, alias)
 
-	// // На начальном этапе работы с примером здесь получаются две ошибки
+	// //**На начальном этапе работы с примером здесь получаются две ошибки
 	// // sqlite3.Error  и  sqlite3.ErrConstraintUnique
 	// // Вероятно они не существенны при деплое.
 	// // Но до деплоя еще очень далеко (21.05.2025), комментирую все условие.
@@ -71,6 +72,7 @@ func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 
 	// 	return 0, fmt.Errorf("%s: execute statement: %w", op, err)
 	// }
+	// //*******
 
 	// Получаем ID созданной записи
 	id, err := res.LastInsertId()

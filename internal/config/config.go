@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -51,8 +52,16 @@ type HTTPServer struct {
 }
 
 func MustLoad() *Config {
+
+	// $env:CONFIG_PATH = "C:\__git\URLsShortener\config\local.yaml"       (на drkk)
+	// $env:CONFIG_PATH = "C:\Mega\__git\URLsShortener\config\local.yaml"  (на ноуте)
+
+	// // Если будут проблемы с переменной окружения, то писать путь так (\ экранируется \\):
+	//configPath := "C:\\__git\\URLsShortener\\config\\local.yaml"
+
 	// Получаем путь до конфиг-файла из env-переменной CONFIG_PATH
 	configPath := os.Getenv("CONFIG_PATH")
+	fmt.Println(configPath)
 	if configPath == "" {
 		log.Fatal("CONFIG_PATH environment variable is not set")
 	}
