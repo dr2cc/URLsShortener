@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/dr2cc/URLsShortener.git/internal/config"
+	"github.com/dr2cc/URLsShortener.git/internal/http-server/handlers/url/save"
 	"github.com/dr2cc/URLsShortener.git/internal/lib/logger/sl"
-	"github.com/dr2cc/URLsShortener.git/internal/server"
 	"github.com/dr2cc/URLsShortener.git/internal/storage/sqlite"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -19,7 +19,6 @@ const (
 )
 
 func main() {
-	// из примера
 	cfg := config.MustLoad()
 
 	//
@@ -41,14 +40,18 @@ func main() {
 	router.Use(middleware.Logger)    // Логирование всех запросов
 	router.Use(middleware.Recoverer) // Если где-то внутри сервера (обработчика запроса) произойдет паника, приложение не должно упасть
 	router.Use(middleware.URLFormat) // Парсер URLов поступающих запросов
-	//********************************
-	// мой "старый" код
-	// обрабатываем аргументы командной строки
-	config.ParseFlags()
 
-	if err := server.Run(); err != nil {
-		panic(err)
-	}
+	router.Post("/", save.New(log, storage))
+
+	// //**FromYandex
+	// // мой "старый" код
+	// // обрабатываем аргументы командной строки
+	// config.ParseFlags()
+
+	// if err := server.Run(); err != nil {
+	// 	panic(err)
+	// }
+	// //
 }
 
 func setupLogger(env string) *slog.Logger {
