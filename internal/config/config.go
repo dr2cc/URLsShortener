@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -37,6 +36,7 @@ import (
 // 		FlagURL = envURL
 // 	}
 // }
+// //**************
 
 // анмаршаллить..
 type Config struct {
@@ -61,7 +61,6 @@ func MustLoad() *Config {
 
 	// Получаем путь до конфиг-файла из env-переменной CONFIG_PATH
 	configPath := os.Getenv("CONFIG_PATH")
-	fmt.Println(configPath)
 	if configPath == "" {
 		log.Fatal("CONFIG_PATH environment variable is not set")
 	}

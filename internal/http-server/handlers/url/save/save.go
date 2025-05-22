@@ -13,6 +13,7 @@ import (
 	"github.com/dr2cc/URLsShortener.git/internal/storage"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator"
 )
 
 type Request struct {
@@ -49,6 +50,8 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 
 		err := render.DecodeJSON(r.Body, &req)
 		if errors.Is(err, io.EOF) {
+			// Такую ошибку встретим, если получили запрос с пустым телом
+			// Обработаем её отдельно
 			log.Error("request body is empty")
 
 			render.JSON(w, r, resp.Error("empty request")) // <----
@@ -66,6 +69,20 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 		// Лучше больше логов, чем меньше - лишнее мы легко сможем почистить,
 		// при необходимости. А вот недостающую информацию мы уже не получим.
 		log.Info("request body decoded", slog.Any("req", req))
+
+		// Создаем объект валидатора
+		// и передаем в него структуру, которую нужно провалидировать
+		if err := validator.New().Struct(req); err != nil {
+			// Приводим ошибку к типу ошибки валидации
+			validateErr := err.(validator.ValidationErrors)
+
+			log.Error("invalid request", sl.Err(err))
+
+			render.JSON(w, r, resp.ValidationError(validateErr))
+
+			return
+		}
+		//
 
 		alias := req.Alias
 		if alias == "" {

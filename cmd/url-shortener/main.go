@@ -1,16 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 
 	"github.com/dr2cc/URLsShortener.git/internal/config"
 	"github.com/dr2cc/URLsShortener.git/internal/http-server/handlers/url/save"
+	mwLogger "github.com/dr2cc/URLsShortener.git/internal/http-server/middleware/logger"
 	"github.com/dr2cc/URLsShortener.git/internal/lib/logger/sl"
 	"github.com/dr2cc/URLsShortener.git/internal/storage/sqlite"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
+
+// Перед запуском нужно установить переменную окружения CONFIG_PATH
+//
+// $env:CONFIG_PATH = "C:\__git\URLsShortener\config\local.yaml"
+// $env:CONFIG_PATH = "C:\Mega\__git\URLsShortener\config\local.yaml"  (на ноуте)
 
 const (
 	envLocal = "local"
@@ -39,9 +46,13 @@ func main() {
 	router.Use(middleware.RequestID) // Добавляет request_id в каждый запрос, для трейсинга
 	router.Use(middleware.Logger)    // Логирование всех запросов
 	router.Use(middleware.Recoverer) // Если где-то внутри сервера (обработчика запроса) произойдет паника, приложение не должно упасть
+	//переопределяем внутренний логгер
+	router.Use(mwLogger.New(log))
 	router.Use(middleware.URLFormat) // Парсер URLов поступающих запросов
 
 	router.Post("/", save.New(log, storage))
+
+	fmt.Println("Server is up!")
 
 	// //**FromYandex
 	// // мой "старый" код
@@ -51,7 +62,7 @@ func main() {
 	// if err := server.Run(); err != nil {
 	// 	panic(err)
 	// }
-	// //
+	// //**************
 }
 
 func setupLogger(env string) *slog.Logger {

@@ -6,6 +6,10 @@ import (
 	"fmt"
 
 	"github.com/dr2cc/URLsShortener.git/internal/storage"
+	"github.com/mattn/go-sqlite3"
+	// //Конструкция ниже отсюда:
+	// //https://www.twilio.com/en-us/blog/use-sqlite-go
+	//_ "github.com/mattn/go-sqlite3"
 )
 
 // Объект Storage
@@ -15,8 +19,7 @@ type Storage struct {
 
 // Конструктор объекта Storage
 func New(storagePath string) (*Storage, error) {
-	//const op = "storage.sqlite.NewStorage" // Имя текущей функции для логов и ошибок
-	const op = "storage.sqlite.New"
+	const op = "storage.sqlite.NewStorage" // Имя текущей функции для логов и ошибок
 
 	db, err := sql.Open("sqlite3", storagePath) // Подключаемся к БД
 	if err != nil {
@@ -55,24 +58,23 @@ func (s *Storage) SaveURL(urlToSave string, alias string) (int64, error) {
 	// Выполняем запрос
 	res, err := stmt.Exec(urlToSave, alias)
 
-	// //**На начальном этапе работы с примером здесь получаются две ошибки
-	// // sqlite3.Error  и  sqlite3.ErrConstraintUnique
-	// // Вероятно они не существенны при деплое.
-	// // Но до деплоя еще очень далеко (21.05.2025), комментирую все условие.
-	// //
-	// // Описание. Здесь мы приводим полученную ошибку ко внутреннему типу библиотеки sqlite3, чтобы посмотреть, не является ли эта ошибка sqlite3.ErrConstraintUnique
-	// // Если это так, значит, мы попытались добавить дубликат имеющейся записи. Об этом мы сообщим в вызывающую функцию,
-	// // вернув уже свою ошибку для данной ситуации:
-	// // storage.ErrURLExists
-	// // Получив ее, сервер сможет сообщить клиенту о том, что такой alias у нас уже есть.
-	// if err != nil {
-	// 	if sqliteErr, ok := err.(sqlite3.Error); ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
-	// 		return 0, fmt.Errorf("%s: %w", op, storage.ErrURLExists)
-	// 	}
+	// В windows нужно предварительно установить tdm64-gcc-xx.x.x-x
+	// И установить значение переменной CGO_ENABLED=1, коммандой
+	// go env -w CGO_ENABLED=
+	//
+	// Здесь мы приводим полученную ошибку ко внутреннему типу библиотеки sqlite3, чтобы посмотреть, не является ли эта ошибка sqlite3.ErrConstraintUnique
+	// Если это так, значит, мы попытались добавить дубликат имеющейся записи. Об этом мы сообщим в вызывающую функцию,
+	// вернув уже свою ошибку для данной ситуации:
+	// storage.ErrURLExists
+	// Получив ее, сервер сможет сообщить клиенту о том, что такой alias у нас уже есть.
+	if err != nil {
+		if sqliteErr, ok := err.(sqlite3.Error); ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+			return 0, fmt.Errorf("%s: %w", op, storage.ErrURLExists)
+		}
 
-	// 	return 0, fmt.Errorf("%s: execute statement: %w", op, err)
-	// }
-	// //*******
+		return 0, fmt.Errorf("%s: execute statement: %w", op, err)
+	}
+	//
 
 	// Получаем ID созданной записи
 	id, err := res.LastInsertId()

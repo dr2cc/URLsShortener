@@ -1,8 +1,6 @@
-#Вроде надо для github.com/mattn/go-sqlite3
-#build: { "cgo_enabled": true }
-#
 env: "local" # Окружение - local, dev или prod
-storage_path: "./storage/storage.db" # файл, в котором будет храниться наша БД
+#storage_path: "./storage/storage.db" # файл, в котором будет храниться наша БД
+storage_path: "./storage.db" # перенес в папку с файлом main.go
 http_server: # конфигурация нашего http-сервера
   address: "localhost:8082"
   timeout: 4s
