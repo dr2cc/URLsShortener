@@ -39,6 +39,7 @@ func main() {
 	log.Info("initializing server", slog.String("address", cfg.Address)) // Помимо сообщения выведем параметр с адресом
 	log.Debug("logger debug mode enabled")
 
+	// sqlite.New или "подключает" файл db , а если его нет то создает
 	storage, err := sqlite.New(cfg.StoragePath)
 	if err != nil {
 		log.Error("failed to initialize storage", sl.Err(err))
@@ -54,6 +55,7 @@ func main() {
 	router.Use(mwLogger.New(log))
 	router.Use(middleware.URLFormat) // Парсер URLов поступающих запросов
 
+	// хендлер
 	router.Post("/", save.New(log, storage))
 
 	// //**FromYandex

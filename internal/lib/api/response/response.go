@@ -30,6 +30,7 @@ func OK() Response {
 	}
 }
 
+// Формируем более информативный ответ на ошибку валидации
 func ValidationError(errs validator.ValidationErrors) Response {
 	var errMsgs []string
 

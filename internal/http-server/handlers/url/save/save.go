@@ -34,6 +34,7 @@ type URLSaver interface {
 // TODO: move to config if needed
 const aliasLength = 6
 
+// Объект urlSaver передадим при создании хендлера из main
 func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.url.save.New"
@@ -45,7 +46,8 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		// Создаем объект запроса и анмаршаллим в него запрос
+		// Создаем объект запроса и десиариализуем (анмаршаллим) в него запрос
+		//
 		var req Request
 
 		err := render.DecodeJSON(r.Body, &req)
@@ -70,8 +72,11 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 		// при необходимости. А вот недостающую информацию мы уже не получим.
 		log.Info("request body decoded", slog.Any("req", req))
 
+		// "Валидируем" запрос.
+		// Нужно проверить, что URL — это действительно URL, что он не пустой.
+		//
 		// Создаем объект валидатора
-		// и передаем в него структуру, которую нужно провалидировать
+		// и передаем в него структуру req (которую нужно провалидировать)
 		if err := validator.New().Struct(req); err != nil {
 			// Приводим ошибку к типу ошибки валидации
 			validateErr := err.(validator.ValidationErrors)
@@ -82,15 +87,19 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 
 			return
 		}
-		//
 
+		// Короткий идентификатор (по которому будем искать оригинальный адрес),
+		// проверяем вручную.
+		// Если он пустой — генерируем случайный:
 		alias := req.Alias
 		if alias == "" {
 			alias = random.NewRandomString(aliasLength)
 		}
 
-		// ...
-
+		//  Сохраняем URL и Alias,
+		//
+		// Объект urlSaver (переданный при создании хендлера из main)
+		// используется именно тут!
 		id, err := urlSaver.SaveURL(req.URL, alias)
 		if errors.Is(err, storage.ErrURLExists) {
 			// Отдельно обрабатываем ситуацию,
@@ -109,6 +118,7 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 			return
 		}
 
+		// возвращаем ответ с сообщением об успехе
 		log.Info("url added", slog.Int64("id", id))
 
 		responseOK(w, r, alias)
